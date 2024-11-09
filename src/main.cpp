@@ -8,11 +8,11 @@
 
 #include "leddata.h"
 
-#define BUTTON      3
-#define LED         2
-#define LED2        10
-#define NUMPIXELS   1
-#define NUMPIXELS2   3
+#define BUTTON 3
+#define LED 2
+#define LED2 10
+#define NUMPIXELS 1
+#define NUMPIXELS2 3
 
 const int freq = 1000;
 const int resolution = 8;
@@ -34,7 +34,6 @@ int high = 255;
 int mid = 128;
 int low = 0;
 
-
 int motor1Pin1 = 6;
 int motor1Pin2 = 5;
 int enable1Pin = 4;
@@ -42,7 +41,7 @@ int enable1Pin = 4;
 int dutyCycle1 = 200;
 
 int speed = 0;
-int maxSpeed =200;
+int maxSpeed = 200;
 int targetSpeed = maxSpeed;
 
 const int pwmChannel1 = 4;
@@ -63,11 +62,11 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
     if (rxValue == "backward")
     {
-        targetSpeed = -maxSpeed;
+      targetSpeed = -maxSpeed;
     }
     if (rxValue == "forward")
     {
-       targetSpeed = maxSpeed;
+      targetSpeed = maxSpeed;
     }
   }
 };
@@ -83,12 +82,15 @@ class MyCallbacksSpeed : public BLECharacteristicCallbacks
 
       Serial.println("*********");
       Serial.print("Received Value: ");
-      if(targetSpeed <0){
-        targetSpeed = -atoi(rxValue.c_str())/16;
-      }else{
-        targetSpeed = atoi(rxValue.c_str())/16;
+      if (targetSpeed < 0)
+      {
+        targetSpeed = -(255 - (atoi(rxValue.c_str()) / 16));
       }
-      
+      else
+      {
+        targetSpeed = 255 - (atoi(rxValue.c_str()) / 16);
+      }
+
       Serial.print(String(targetSpeed));
     }
 
@@ -103,16 +105,17 @@ class MyCallbacksSpeed : public BLECharacteristicCallbacks
   }
 };
 
-
-
-
-void buttonRead(void* pvParameters) {
-  while(true) {
+void buttonRead(void *pvParameters)
+{
+  while (true)
+  {
     buttonCurrentState = digitalRead(BUTTON);
-    if(buttonLastState == LOW && buttonCurrentState == HIGH) {
+    if (buttonLastState == LOW && buttonCurrentState == HIGH)
+    {
       Serial.println("Button Pressed!");
       buttonCount++;
-      if (buttonCount > 6) {
+      if (buttonCount > 6)
+      {
         buttonCount = 1;
       }
     }
@@ -121,69 +124,69 @@ void buttonRead(void* pvParameters) {
   }
 }
 
-void changeLedState(void* pvParameters) {
-  while(true) {
-    //pixels.clear();
-    switch (buttonCount) {
-      case 1:
-        // pixels.setPixelColor(0, pixels.Color(10, 20, 10));
+void changeLedState(void *pvParameters)
+{
+  while (true)
+  {
+    // pixels.clear();
+    switch (buttonCount)
+    {
+    case 1:
+      // pixels.setPixelColor(0, pixels.Color(10, 20, 10));
       //   pixels2.setPixelColor(0, pixels.Color(10, 20, 10));
       //   pixels2.setPixelColor(1, pixels.Color(10, 20, 10));
       //   pixels2.setPixelColor(2, pixels.Color(10, 20, 10));
-         break;
-      // case 2:
-      //   pixels.setPixelColor(0, pixels.Color(high, mid, mid));
-      //   pixels2.setPixelColor(0, pixels.Color(high, mid, mid));
-      //   break;
-      // case 3:
-      //   pixels.setPixelColor(0, pixels.Color(low, high, low));
-      //   pixels2.setPixelColor(0, pixels.Color(low, high, low));
-      //   break;
-      // case 4:
-      //   pixels.setPixelColor(0, pixels.Color(mid, high, mid));
-      //   pixels2.setPixelColor(0, pixels.Color(mid, high, mid));
-      //   break;
-      // case 5:
-      //   pixels.setPixelColor(0, pixels.Color(low, low, high));
-      //   pixels2.setPixelColor(0, pixels.Color(low, low, high));
-      //   break;
-      // case 6:
-      //   pixels.setPixelColor(0, pixels.Color(mid, mid, high));
-      //    pixels2.setPixelColor(0, pixels.Color(mid, mid, high));
-      //   break;
-      default:
-        break;
+      break;
+    // case 2:
+    //   pixels.setPixelColor(0, pixels.Color(high, mid, mid));
+    //   pixels2.setPixelColor(0, pixels.Color(high, mid, mid));
+    //   break;
+    // case 3:
+    //   pixels.setPixelColor(0, pixels.Color(low, high, low));
+    //   pixels2.setPixelColor(0, pixels.Color(low, high, low));
+    //   break;
+    // case 4:
+    //   pixels.setPixelColor(0, pixels.Color(mid, high, mid));
+    //   pixels2.setPixelColor(0, pixels.Color(mid, high, mid));
+    //   break;
+    // case 5:
+    //   pixels.setPixelColor(0, pixels.Color(low, low, high));
+    //   pixels2.setPixelColor(0, pixels.Color(low, low, high));
+    //   break;
+    // case 6:
+    //   pixels.setPixelColor(0, pixels.Color(mid, mid, high));
+    //    pixels2.setPixelColor(0, pixels.Color(mid, mid, high));
+    //   break;
+    default:
+      break;
     }
     pixels.show();
     pixels2.show();
     vTaskDelay(100 / portTICK_RATE_MS);
   }
 }
- 
- 
-void setup() {
+
+void setup()
+{
   Serial.begin(115200);
 
-   pinMode(motor1Pin1, OUTPUT);
+  pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
-  //pinMode(enable1Pin, OUTPUT);
+  // pinMode(enable1Pin, OUTPUT);
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
 
-
-   ledcSetup(0,800,8);
+  ledcSetup(0, 800, 8);
   // Attach the PWM signal to GPIO2
   ledcAttachPin(enable1Pin, 0);
-  
+
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(0, 0);
 
-  
   // ledcSetup(pwmChannel1, freq, resolution);
-  //digitalWrite(enable1Pin, HIGH);
+  // digitalWrite(enable1Pin, HIGH);
   // ledcAttachPin(enable1Pin, pwmChannel1);
-  //ledcWrite(pwmChannel1, dutyCycle1);
-
+  // ledcWrite(pwmChannel1, dutyCycle1);
 
   pixels.begin();
   pinMode(BUTTON, INPUT_PULLUP);
@@ -191,8 +194,6 @@ void setup() {
   xTaskCreate(buttonRead, "buttonRead", 2048 * 1, nullptr, 128 * 10, &TaskHandle_buttonRead);
   xTaskCreate(changeLedState, "changeLedState", 2048 * 1, nullptr, 128 * 1, &TaskHandle_Led);
 
-
-  
   Serial.println("Starting BLE work!");
 
   BLEDevice::init("ESP32 AS A BLE");
@@ -222,13 +223,12 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
   Serial.println("Characteristic defined!");
-
-  
 }
- 
-void loop() {
+
+void loop()
+{
   //  int elements = sizeof(brightness) / sizeof(brightness[0]);
-        
+
   //       for (int i=0; i < elements; i++) {
   //               int count = pgm_read_byte(&(brightness[i][0]));
   //               int red   = pgm_read_byte(&(brightness[i][1]));
@@ -242,28 +242,31 @@ void loop() {
   //               pixels2.setPixelColor(0, pixels2.Color(red, green, blue));
   //               pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
   //               pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
-    
+
   //               for (int j=count; j>0; j--)
   //                       delay(40);
   //       }
-  if (speed < targetSpeed){
-    speed ++;
+  if (speed < targetSpeed)
+  {
+    speed++;
   }
-  if (speed > targetSpeed){
-    speed --;
+  if (speed > targetSpeed)
+  {
+    speed--;
   }
-  
 
-ledcWrite(0, abs(speed));
+  ledcWrite(0, abs(speed));
 
-if (speed < 0){
+  if (speed < 0)
+  {
     digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, HIGH);
+    digitalWrite(motor1Pin2, HIGH);
   }
 
-  if (speed > 0){
+  if (speed > 0)
+  {
     digitalWrite(motor1Pin1, HIGH);
-  digitalWrite(motor1Pin2, LOW);
+    digitalWrite(motor1Pin2, LOW);
   }
 
   delay(10);
