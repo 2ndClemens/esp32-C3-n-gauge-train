@@ -43,6 +43,8 @@ int dutyCycle1 = 200;
 int speed = 0;
 int maxSpeed = 200;
 int targetSpeed = maxSpeed;
+int colorIndex = 0;
+int timerIndex = 0;
 
 const int pwmChannel1 = 4;
 
@@ -227,25 +229,39 @@ void setup()
 
 void loop()
 {
-  //  int elements = sizeof(brightness) / sizeof(brightness[0]);
+  int elements = sizeof(brightness) / sizeof(brightness[0]);
 
-  //       for (int i=0; i < elements; i++) {
-  //               int count = pgm_read_byte(&(brightness[i][0]));
-  //               int red   = pgm_read_byte(&(brightness[i][1]));
-  //               int green = pgm_read_byte(&(brightness[i][2]));
-  //               int blue  = pgm_read_byte(&(brightness[i][3]));
+  // for (int i=0; i < elements; i++) {
+  int count = pgm_read_byte(&(brightness[colorIndex][0]));
+  int red = pgm_read_byte(&(brightness[colorIndex][1]));
+  int green = pgm_read_byte(&(brightness[colorIndex][2]));
+  int blue = pgm_read_byte(&(brightness[colorIndex][3]));
 
-  //               // analogWrite(redPin,   red);
-  //               // analogWrite(greenPin, green);
-  //               // analogWrite(bluePin,  blue);
-  //               pixels.setPixelColor(0, pixels.Color(red, green, blue));
-  //               pixels2.setPixelColor(0, pixels2.Color(red, green, blue));
-  //               pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
-  //               pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
+  // analogWrite(redPin,   red);
+  // analogWrite(greenPin, green);
+  // analogWrite(bluePin,  blue);
+  pixels.setPixelColor(0, pixels.Color(red, green, blue));
+  pixels2.setPixelColor(0, pixels2.Color(red, green, blue));
+  pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
+  pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
 
-  //               for (int j=count; j>0; j--)
-  //                       delay(40);
-  //       }
+  // for (int j=count; j>0; j--)
+  if (timerIndex > count)
+  {
+    colorIndex++;
+    timerIndex = 0;
+  }
+  else
+  {
+    timerIndex++;
+  }
+  // delay(40);
+  //}
+
+  if (colorIndex > elements)
+  {
+    colorIndex = 0;
+  }
   if (speed < targetSpeed)
   {
     speed++;
