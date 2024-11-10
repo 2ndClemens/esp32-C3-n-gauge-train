@@ -58,7 +58,7 @@ const int pwmChannel1 = 4;
 };
 LedInfo leds[] = {
     { 0,0,0, brightness, sizeof(brightness) / sizeof(brightness[0]) },
-    { 1,0,0, brightness2, sizeof(brightness2) / sizeof(brightness2[0]) },
+    { 1,1,0, brightness3, sizeof(brightness2) / sizeof(brightness3[0]) },
     { 2,0,0, brightness3, sizeof(brightness3) / sizeof(brightness3[0]) }
 
 };
