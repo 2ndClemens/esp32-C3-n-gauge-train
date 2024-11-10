@@ -171,7 +171,7 @@ void changeLedState(void *pvParameters)
       leds[i].timerIndex++;
     }
 
-    if (leds[i].colorIndex > leds[i].playlistLength)
+    if (leds[i].colorIndex > leds[i].playlistLength-2)
     {
       leds[i].colorIndex = 0;
     }}
