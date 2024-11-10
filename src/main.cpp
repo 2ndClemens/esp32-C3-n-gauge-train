@@ -191,6 +191,7 @@ void setup()
   // ledcWrite(pwmChannel1, dutyCycle1);
 
   pixels.begin();
+  pixels2.begin();
   pinMode(BUTTON, INPUT_PULLUP);
 
   xTaskCreate(buttonRead, "buttonRead", 2048 * 1, nullptr, 128 * 10, &TaskHandle_buttonRead);
@@ -232,18 +233,22 @@ void loop()
   int elements = sizeof(brightness) / sizeof(brightness[0]);
 
   // for (int i=0; i < elements; i++) {
-  int count = pgm_read_byte(&(brightness[colorIndex][0]));
+  int count = pgm_read_byte(&(brightness[colorIndex][0]))*2;
   int red = pgm_read_byte(&(brightness[colorIndex][1]));
   int green = pgm_read_byte(&(brightness[colorIndex][2]));
   int blue = pgm_read_byte(&(brightness[colorIndex][3]));
+  int nextRed = pgm_read_byte(&(brightness[colorIndex + 1][1]));
+  int nextGreen = pgm_read_byte(&(brightness[colorIndex + 1][2]));
+  int nextBlue = pgm_read_byte(&(brightness[colorIndex + 1][3]));
 
   // analogWrite(redPin,   red);
   // analogWrite(greenPin, green);
   // analogWrite(bluePin,  blue);
-  pixels.setPixelColor(0, pixels.Color(red, green, blue));
-  pixels2.setPixelColor(0, pixels2.Color(red, green, blue));
-  pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
-  pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
+  // pixels.setPixelColor(0, pixels.Color(red, green, blue));
+  pixels2.setPixelColor(0, pixels2.Color(red + (nextRed - red)* timerIndex / count , green + (nextGreen - green)* timerIndex / count , blue + (nextBlue - blue) * timerIndex/ count ));
+  pixels2.show();
+  // pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
+  // pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
 
   // for (int j=count; j>0; j--)
   if (timerIndex > count)
