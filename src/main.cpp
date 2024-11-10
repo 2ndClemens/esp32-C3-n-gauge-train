@@ -128,44 +128,83 @@ void buttonRead(void *pvParameters)
 
 void changeLedState(void *pvParameters)
 {
-  while (true)
+   while (true)
+   {
+  //   // pixels.clear();
+  //   switch (buttonCount)
+  //   {
+  //   case 1:
+  //     // pixels.setPixelColor(0, pixels.Color(10, 20, 10));
+  //     //   pixels2.setPixelColor(0, pixels.Color(10, 20, 10));
+  //     //   pixels2.setPixelColor(1, pixels.Color(10, 20, 10));
+  //     //   pixels2.setPixelColor(2, pixels.Color(10, 20, 10));
+  //     break;
+  //   // case 2:
+  //   //   pixels.setPixelColor(0, pixels.Color(high, mid, mid));
+  //   //   pixels2.setPixelColor(0, pixels.Color(high, mid, mid));
+  //   //   break;
+  //   // case 3:
+  //   //   pixels.setPixelColor(0, pixels.Color(low, high, low));
+  //   //   pixels2.setPixelColor(0, pixels.Color(low, high, low));
+  //   //   break;
+  //   // case 4:
+  //   //   pixels.setPixelColor(0, pixels.Color(mid, high, mid));
+  //   //   pixels2.setPixelColor(0, pixels.Color(mid, high, mid));
+  //   //   break;
+  //   // case 5:
+  //   //   pixels.setPixelColor(0, pixels.Color(low, low, high));
+  //   //   pixels2.setPixelColor(0, pixels.Color(low, low, high));
+  //   //   break;
+  //   // case 6:
+  //   //   pixels.setPixelColor(0, pixels.Color(mid, mid, high));
+  //   //    pixels2.setPixelColor(0, pixels.Color(mid, mid, high));
+  //   //   break;
+  //   default:
+  //     break;
+  //   }
+  //   //pixels.show();
+  //   //pixels2.show();
+ int elements = sizeof(brightness) / sizeof(brightness[0]);
+
+  // for (int i=0; i < elements; i++) {
+  int count = pgm_read_byte(&(brightness[colorIndex][0]))*10;
+  int red = pgm_read_byte(&(brightness[colorIndex][1]));
+  int green = pgm_read_byte(&(brightness[colorIndex][2]));
+  int blue = pgm_read_byte(&(brightness[colorIndex][3]));
+  int nextRed = pgm_read_byte(&(brightness[colorIndex + 1][1]));
+  int nextGreen = pgm_read_byte(&(brightness[colorIndex + 1][2]));
+  int nextBlue = pgm_read_byte(&(brightness[colorIndex + 1][3]));
+
+  // analogWrite(redPin,   red);
+  // analogWrite(greenPin, green);
+  // analogWrite(bluePin,  blue);
+  // pixels.setPixelColor(0, pixels.Color(red, green, blue));
+  pixels2.setPixelColor(0, pixels2.Color(red + (nextRed - red)* timerIndex / count , green + (nextGreen - green)* timerIndex / count , blue + (nextBlue - blue) * timerIndex/ count ));
+  pixels2.show();
+  // pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
+  // pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
+
+  // for (int j=count; j>0; j--)
+  if (timerIndex > count)
   {
-    // pixels.clear();
-    switch (buttonCount)
-    {
-    case 1:
-      // pixels.setPixelColor(0, pixels.Color(10, 20, 10));
-      //   pixels2.setPixelColor(0, pixels.Color(10, 20, 10));
-      //   pixels2.setPixelColor(1, pixels.Color(10, 20, 10));
-      //   pixels2.setPixelColor(2, pixels.Color(10, 20, 10));
-      break;
-    // case 2:
-    //   pixels.setPixelColor(0, pixels.Color(high, mid, mid));
-    //   pixels2.setPixelColor(0, pixels.Color(high, mid, mid));
-    //   break;
-    // case 3:
-    //   pixels.setPixelColor(0, pixels.Color(low, high, low));
-    //   pixels2.setPixelColor(0, pixels.Color(low, high, low));
-    //   break;
-    // case 4:
-    //   pixels.setPixelColor(0, pixels.Color(mid, high, mid));
-    //   pixels2.setPixelColor(0, pixels.Color(mid, high, mid));
-    //   break;
-    // case 5:
-    //   pixels.setPixelColor(0, pixels.Color(low, low, high));
-    //   pixels2.setPixelColor(0, pixels.Color(low, low, high));
-    //   break;
-    // case 6:
-    //   pixels.setPixelColor(0, pixels.Color(mid, mid, high));
-    //    pixels2.setPixelColor(0, pixels.Color(mid, mid, high));
-    //   break;
-    default:
-      break;
-    }
-    pixels.show();
-    pixels2.show();
-    vTaskDelay(100 / portTICK_RATE_MS);
+    colorIndex++;
+    timerIndex = 0;
   }
+  else
+  {
+    timerIndex++;
+  }
+  // delay(40);
+  //}
+
+  if (colorIndex > elements)
+  {
+    colorIndex = 0;
+  }
+
+     vTaskDelay(1 / portTICK_RATE_MS);
+   }
+ 
 }
 
 void setup()
@@ -230,43 +269,7 @@ void setup()
 
 void loop()
 {
-  int elements = sizeof(brightness) / sizeof(brightness[0]);
-
-  // for (int i=0; i < elements; i++) {
-  int count = pgm_read_byte(&(brightness[colorIndex][0]))*2;
-  int red = pgm_read_byte(&(brightness[colorIndex][1]));
-  int green = pgm_read_byte(&(brightness[colorIndex][2]));
-  int blue = pgm_read_byte(&(brightness[colorIndex][3]));
-  int nextRed = pgm_read_byte(&(brightness[colorIndex + 1][1]));
-  int nextGreen = pgm_read_byte(&(brightness[colorIndex + 1][2]));
-  int nextBlue = pgm_read_byte(&(brightness[colorIndex + 1][3]));
-
-  // analogWrite(redPin,   red);
-  // analogWrite(greenPin, green);
-  // analogWrite(bluePin,  blue);
-  // pixels.setPixelColor(0, pixels.Color(red, green, blue));
-  pixels2.setPixelColor(0, pixels2.Color(red + (nextRed - red)* timerIndex / count , green + (nextGreen - green)* timerIndex / count , blue + (nextBlue - blue) * timerIndex/ count ));
-  pixels2.show();
-  // pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
-  // pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
-
-  // for (int j=count; j>0; j--)
-  if (timerIndex > count)
-  {
-    colorIndex++;
-    timerIndex = 0;
-  }
-  else
-  {
-    timerIndex++;
-  }
-  // delay(40);
-  //}
-
-  if (colorIndex > elements)
-  {
-    colorIndex = 0;
-  }
+  
   if (speed < targetSpeed)
   {
     speed++;
@@ -290,5 +293,5 @@ void loop()
     digitalWrite(motor1Pin2, LOW);
   }
 
-  delay(10);
+  delay(40);
 }
