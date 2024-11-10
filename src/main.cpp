@@ -7,6 +7,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "leddata.h"
+#include "leddata2.h"
 
 #define BUTTON 3
 #define LED 2
@@ -43,10 +44,21 @@ int dutyCycle1 = 200;
 int speed = 0;
 int maxSpeed = 200;
 int targetSpeed = maxSpeed;
-int colorIndex = 0;
-int timerIndex = 0;
+
 
 const int pwmChannel1 = 4;
+
+  struct LedInfo {
+    uint8_t ledNum;             // The index number for the LED
+    uint8_t colorIndex;
+     uint16_t timerIndex; 
+    const uint8_t (*playlist)[4];  // Pointer to the playlist array
+    uint16_t playlistLength;  // Length of the playlist array
+};
+LedInfo leds[] = {
+    { 0,0,0, brightness, sizeof(brightness) / sizeof(brightness[0]) },
+    { 1,0,0, brightness2, sizeof(brightness2) / sizeof(brightness2[0]) }
+};
 
 class MyCallbacks : public BLECharacteristicCallbacks
 {
@@ -128,83 +140,41 @@ void buttonRead(void *pvParameters)
 
 void changeLedState(void *pvParameters)
 {
-   while (true)
-   {
-  //   // pixels.clear();
-  //   switch (buttonCount)
-  //   {
-  //   case 1:
-  //     // pixels.setPixelColor(0, pixels.Color(10, 20, 10));
-  //     //   pixels2.setPixelColor(0, pixels.Color(10, 20, 10));
-  //     //   pixels2.setPixelColor(1, pixels.Color(10, 20, 10));
-  //     //   pixels2.setPixelColor(2, pixels.Color(10, 20, 10));
-  //     break;
-  //   // case 2:
-  //   //   pixels.setPixelColor(0, pixels.Color(high, mid, mid));
-  //   //   pixels2.setPixelColor(0, pixels.Color(high, mid, mid));
-  //   //   break;
-  //   // case 3:
-  //   //   pixels.setPixelColor(0, pixels.Color(low, high, low));
-  //   //   pixels2.setPixelColor(0, pixels.Color(low, high, low));
-  //   //   break;
-  //   // case 4:
-  //   //   pixels.setPixelColor(0, pixels.Color(mid, high, mid));
-  //   //   pixels2.setPixelColor(0, pixels.Color(mid, high, mid));
-  //   //   break;
-  //   // case 5:
-  //   //   pixels.setPixelColor(0, pixels.Color(low, low, high));
-  //   //   pixels2.setPixelColor(0, pixels.Color(low, low, high));
-  //   //   break;
-  //   // case 6:
-  //   //   pixels.setPixelColor(0, pixels.Color(mid, mid, high));
-  //   //    pixels2.setPixelColor(0, pixels.Color(mid, mid, high));
-  //   //   break;
-  //   default:
-  //     break;
-  //   }
-  //   //pixels.show();
-  //   //pixels2.show();
- int elements = sizeof(brightness) / sizeof(brightness[0]);
 
-  // for (int i=0; i < elements; i++) {
-  int count = pgm_read_byte(&(brightness[colorIndex][0]))*10;
-  int red = pgm_read_byte(&(brightness[colorIndex][1]));
-  int green = pgm_read_byte(&(brightness[colorIndex][2]));
-  int blue = pgm_read_byte(&(brightness[colorIndex][3]));
-  int nextRed = pgm_read_byte(&(brightness[colorIndex + 1][1]));
-  int nextGreen = pgm_read_byte(&(brightness[colorIndex + 1][2]));
-  int nextBlue = pgm_read_byte(&(brightness[colorIndex + 1][3]));
 
-  // analogWrite(redPin,   red);
-  // analogWrite(greenPin, green);
-  // analogWrite(bluePin,  blue);
-  // pixels.setPixelColor(0, pixels.Color(red, green, blue));
-  pixels2.setPixelColor(0, pixels2.Color(red + (nextRed - red)* timerIndex / count , green + (nextGreen - green)* timerIndex / count , blue + (nextBlue - blue) * timerIndex/ count ));
-  pixels2.show();
-  // pixels2.setPixelColor(1, pixels2.Color(red, green, blue));
-  // pixels2.setPixelColor(2, pixels2.Color(red, green, blue));
-
-  // for (int j=count; j>0; j--)
-  if (timerIndex > count)
-  {
-    colorIndex++;
-    timerIndex = 0;
-  }
-  else
-  {
-    timerIndex++;
-  }
-  // delay(40);
-  //}
-
-  if (colorIndex > elements)
-  {
-    colorIndex = 0;
-  }
-
-     vTaskDelay(1 / portTICK_RATE_MS);
-   }
  
+  while (true)
+  {
+    for (int i = 0; i < 2; i++) {
+    //int elements = sizeof(brightness) / sizeof(brightness[0]);
+
+    int count = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][0])) * 10;
+    int red = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][1]));
+    int green = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][2]));
+    int blue = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][3]));
+    int nextRed = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex + 1][1]));
+    int nextGreen = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex + 1][2]));
+    int nextBlue = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex + 1][3]));
+
+    pixels2.setPixelColor(leds[i].ledNum, pixels2.Color(red + (nextRed - red) * leds[i].timerIndex / count, green + (nextGreen - green) * leds[i].timerIndex / count, blue + (nextBlue - blue) * leds[i].timerIndex / count));
+
+    if (leds[i].timerIndex > count)
+    {
+      leds[i].colorIndex++;
+      leds[i].timerIndex = 0;
+    }
+    else
+    {
+      leds[i].timerIndex++;
+    }
+
+    if (leds[i].colorIndex > leds[i].playlistLength)
+    {
+      leds[i].colorIndex = 0;
+    }}
+    pixels2.show();
+    vTaskDelay(1 / portTICK_RATE_MS);
+  }
 }
 
 void setup()
@@ -269,7 +239,7 @@ void setup()
 
 void loop()
 {
-  
+
   if (speed < targetSpeed)
   {
     speed++;
