@@ -8,6 +8,7 @@
 
 #include "leddata.h"
 #include "leddata2.h"
+#include "leddata3.h"
 
 #define BUTTON 3
 #define LED 2
@@ -57,7 +58,9 @@ const int pwmChannel1 = 4;
 };
 LedInfo leds[] = {
     { 0,0,0, brightness, sizeof(brightness) / sizeof(brightness[0]) },
-    { 1,0,0, brightness2, sizeof(brightness2) / sizeof(brightness2[0]) }
+    { 1,0,0, brightness2, sizeof(brightness2) / sizeof(brightness2[0]) },
+    { 2,0,0, brightness3, sizeof(brightness3) / sizeof(brightness3[0]) }
+
 };
 
 class MyCallbacks : public BLECharacteristicCallbacks
@@ -145,7 +148,7 @@ void changeLedState(void *pvParameters)
  
   while (true)
   {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
     //int elements = sizeof(brightness) / sizeof(brightness[0]);
 
     int count = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][0])) * 10;
