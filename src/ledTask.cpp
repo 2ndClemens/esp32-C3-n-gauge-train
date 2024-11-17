@@ -10,7 +10,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define NUMPIXELS2 3
-#define LED2 10
+#define LED2 1
 
 
 Adafruit_NeoPixel pixels2(NUMPIXELS2, LED2, NEO_GRB + NEO_KHZ800);
