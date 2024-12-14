@@ -6,10 +6,11 @@
 #include "leddata.h"
 #include "leddata2.h"
 #include "leddata3.h"
+#include "leddata4.h"
 
 #include <Adafruit_NeoPixel.h>
 
-#define NUMPIXELS2 3
+#define NUMPIXELS2 10
 #define LED2 1
 
 
@@ -23,9 +24,19 @@ Adafruit_NeoPixel pixels2(NUMPIXELS2, LED2, NEO_GRB + NEO_KHZ800);
     uint16_t playlistLength;  // Length of the playlist array
 };
 LedInfo leds[] = {
-    { 0,0,0, brightness, sizeof(brightness) / sizeof(brightness[0]) },
-    { 1,1,0, brightness3, sizeof(brightness2) / sizeof(brightness3[0]) },
-    { 2,0,0, brightness3, sizeof(brightness3) / sizeof(brightness3[0]) }
+    { 0,0,0, brightness3, sizeof(brightness2) / sizeof(brightness3[0]) },
+    { 1,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+    { 2,0,0, brightness3, sizeof(brightness3) / sizeof(brightness3[0]) },
+    { 3,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+    { 4,0,0, brightness, sizeof(brightness) / sizeof(brightness[0]) },
+     { 5,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+     { 6,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+     { 7,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+     { 8,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+     { 9,0,0, brightness4, sizeof(brightness4) / sizeof(brightness4[0]) },
+
+
+
 
 };
 
@@ -37,7 +48,7 @@ void changeLedState(void *pvParameters)
 {
   while (true)
   {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 10; i++) {
     //int elements = sizeof(brightness) / sizeof(brightness[0]);
 
     int count = pgm_read_byte(&(leds[i].playlist[leds[i].colorIndex][0])) * 10;
