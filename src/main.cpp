@@ -17,8 +17,10 @@ const int freq = 1000;
 const int resolution = 8;
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-#define CHARACTERISTIC_UUID_SPEED "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_DIRECTION_1 "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_SPEED_1 "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_DIRECTION_2 "beb5483c-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_SPEED_2 "beb5483d-36e1-4688-b7f5-ea07361b26a8"
 
 Adafruit_NeoPixel pixels(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
 
@@ -160,20 +162,41 @@ void setup()
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID,
+  BLECharacteristic *pCharacteristicDirection1 = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_DIRECTION_1,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
 
-  BLECharacteristic *pCharacteristicSpeed = pService->createCharacteristic(
-      CHARACTERISTIC_UUID_SPEED,
+  BLECharacteristic *pCharacteristicSpeed1 = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_SPEED_1,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristicSpeed->setCallbacks(new MyCallbacksSpeed());
-  pCharacteristic->addDescriptor(new BLE2902());
-  pCharacteristicSpeed->addDescriptor(new BLE2902());
+  pCharacteristicDirection1->setCallbacks(new MyCallbacks());
+  pCharacteristicSpeed1->setCallbacks(new MyCallbacksSpeed());
+  pCharacteristicDirection1->addDescriptor(new BLE2902());
+  pCharacteristicSpeed1->addDescriptor(new BLE2902());
 
-  pCharacteristic->setValue("Hi,other ESP32 here is your data");
-  pCharacteristicSpeed->setValue("Hi,other ESP32 here is your data");
+  pCharacteristicDirection1->setValue("Hi,other ESP32 here is your data");
+  pCharacteristicSpeed1->setValue("Hi,other ESP32 here is your data");
+
+
+
+    BLECharacteristic *pCharacteristicDirection2 = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_DIRECTION_2,
+      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+
+  BLECharacteristic *pCharacteristicSpeed2 = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_SPEED_2,
+      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  pCharacteristicDirection2->setCallbacks(new MyCallbacks());
+  pCharacteristicSpeed2->setCallbacks(new MyCallbacksSpeed());
+  pCharacteristicDirection2->addDescriptor(new BLE2902());
+  pCharacteristicSpeed2->addDescriptor(new BLE2902());
+
+  pCharacteristicDirection2->setValue("Hi,other ESP32 here is your data");
+  pCharacteristicSpeed2->setValue("Hi,other ESP32 here is your data");
+
+
+
+
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
