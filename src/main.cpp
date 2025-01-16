@@ -39,18 +39,31 @@ int motor1Pin1 = 6;
 int motor1Pin2 = 5;
 int enable1Pin = 4;
 
+int motor2Pin1 = 10;
+int motor2Pin2 = 8;
+int enable2Pin = 7;
+
 int dutyCycle1 = 200;
 
-int speed = 0;
-int maxSpeed = 200;
-int targetSpeed = maxSpeed;
+int speed1 = 0;
+int maxSpeed1 = 200;
+int targetSpeed1 = maxSpeed1;
+
+int dutyCycle2 = 200;
+
+int speed2 = 0;
+int maxSpeed2 = 200;
+int targetSpeed2 = maxSpeed2;
+
+std::__cxx11::string direction1 = "forward";
+std::__cxx11::string direction2 = "forward";
 
 
 const int pwmChannel1 = 4;
 
  
 
-class MyCallbacks : public BLECharacteristicCallbacks
+class MyCallbacksDirection1 : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
@@ -63,19 +76,21 @@ class MyCallbacks : public BLECharacteristicCallbacks
       Serial.print("Received Value: ");
       Serial.print(rxValue.c_str());
     }
+    direction1 = rxValue;
 
     if (rxValue == "backward")
     {
-      targetSpeed = -maxSpeed;
+      targetSpeed1 = -abs(targetSpeed1);
+      
     }
     if (rxValue == "forward")
     {
-      targetSpeed = maxSpeed;
+      targetSpeed1 = abs(targetSpeed1);
     }
   }
 };
 
-class MyCallbacksSpeed : public BLECharacteristicCallbacks
+class MyCallbacksDirection2 : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
@@ -86,26 +101,69 @@ class MyCallbacksSpeed : public BLECharacteristicCallbacks
 
       Serial.println("*********");
       Serial.print("Received Value: ");
-      if (targetSpeed < 0)
+      Serial.print(rxValue.c_str());
+    }
+    direction2 = rxValue;
+
+    if (rxValue == "backward")
+    {
+      targetSpeed2 = -abs(targetSpeed2);
+      
+    }
+    if (rxValue == "forward")
+    {
+      targetSpeed2 = abs(targetSpeed2);
+    }
+  }
+};
+
+class MyCallbacksSpeed1 : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    std::string rxValue = pCharacteristic->getValue();
+
+    if (rxValue.length() > 0)
+    {
+
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      if (direction1 == "backward")
       {
-        targetSpeed = -(255 - (atoi(rxValue.c_str()) / 16));
+        targetSpeed1 = -((atoi(rxValue.c_str()) / 16));
       }
       else
       {
-        targetSpeed = 255 - (atoi(rxValue.c_str()) / 16);
+        targetSpeed1 = (atoi(rxValue.c_str()) / 16);
       }
 
-      Serial.print(String(targetSpeed));
+      Serial.print(String(targetSpeed1));
     }
+  }
+};
 
-    // if (rxValue == "backward")
-    // {
-    //     targetSpeed = -maxSpeed;
-    // }
-    // if (rxValue == "forward")
-    // {
-    //    targetSpeed = maxSpeed;
-    // }
+class MyCallbacksSpeed2 : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    std::string rxValue = pCharacteristic->getValue();
+
+    if (rxValue.length() > 0)
+    {
+
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      if (direction2 == "backward")
+      {
+        targetSpeed2 = -((atoi(rxValue.c_str()) / 16));
+      }
+      else
+      {
+        targetSpeed2 = (atoi(rxValue.c_str()) / 16);
+      }
+
+      Serial.print(String(targetSpeed2));
+    }
   }
 };
 
@@ -138,12 +196,25 @@ void setup()
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW);
 
+    pinMode(motor2Pin1, OUTPUT);
+  pinMode(motor2Pin2, OUTPUT);
+  // pinMode(enable1Pin, OUTPUT);
+  digitalWrite(motor2Pin1, HIGH);
+  digitalWrite(motor2Pin2, LOW);
+
   ledcSetup(0, 800, 8);
   // Attach the PWM signal to GPIO2
   ledcAttachPin(enable1Pin, 0);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(0, 0);
+
+    ledcSetup(1, 800, 8);
+  // Attach the PWM signal to GPIO2
+  ledcAttachPin(enable2Pin, 1);
+
+  // Set the duty cycle to 2ms (2000 microseconds)
+  ledcWrite(1, 0);
 
   // ledcSetup(pwmChannel1, freq, resolution);
   // digitalWrite(enable1Pin, HIGH);
@@ -169,8 +240,8 @@ void setup()
   BLECharacteristic *pCharacteristicSpeed1 = pService->createCharacteristic(
       CHARACTERISTIC_UUID_SPEED_1,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
-  pCharacteristicDirection1->setCallbacks(new MyCallbacks());
-  pCharacteristicSpeed1->setCallbacks(new MyCallbacksSpeed());
+  pCharacteristicDirection1->setCallbacks(new MyCallbacksDirection1());
+  pCharacteristicSpeed1->setCallbacks(new MyCallbacksSpeed1());
   pCharacteristicDirection1->addDescriptor(new BLE2902());
   pCharacteristicSpeed1->addDescriptor(new BLE2902());
 
@@ -186,8 +257,8 @@ void setup()
   BLECharacteristic *pCharacteristicSpeed2 = pService->createCharacteristic(
       CHARACTERISTIC_UUID_SPEED_2,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
-  pCharacteristicDirection2->setCallbacks(new MyCallbacks());
-  pCharacteristicSpeed2->setCallbacks(new MyCallbacksSpeed());
+  pCharacteristicDirection2->setCallbacks(new MyCallbacksDirection2());
+  pCharacteristicSpeed2->setCallbacks(new MyCallbacksSpeed2());
   pCharacteristicDirection2->addDescriptor(new BLE2902());
   pCharacteristicSpeed2->addDescriptor(new BLE2902());
 
@@ -211,28 +282,53 @@ void setup()
 void loop()
 {
 
-  if (speed < targetSpeed)
+  if (speed1 < targetSpeed1)
   {
-    speed++;
+    speed1++;
   }
-  if (speed > targetSpeed)
+  if (speed1 > targetSpeed1)
   {
-    speed--;
+    speed1--;
   }
 
-  ledcWrite(0, abs(speed));
+  ledcWrite(0, abs(speed1));
 
-  if (speed < 0)
+  if (speed1 < 0)
   {
     digitalWrite(motor1Pin1, LOW);
     digitalWrite(motor1Pin2, HIGH);
   }
 
-  if (speed > 0)
+  if (speed1 > 0)
   {
     digitalWrite(motor1Pin1, HIGH);
     digitalWrite(motor1Pin2, LOW);
   }
 
-  delay(40);
+  
+
+    if (speed2 < targetSpeed2)
+  {
+    speed2++;
+  }
+  if (speed2 > targetSpeed2)
+  {
+    speed2--;
+  }
+
+  ledcWrite(1, abs(speed2));
+
+  if (speed2 < 0)
+  {
+    digitalWrite(motor2Pin1, LOW);
+    digitalWrite(motor2Pin2, HIGH);
+  }
+
+  if (speed2 > 0)
+  {
+    digitalWrite(motor2Pin1, HIGH);
+    digitalWrite(motor2Pin2, LOW);
+  }
+
+  delay(10);
 }
