@@ -12,7 +12,6 @@
 
 #define NUMPIXELS 1
 
-
 const int freq = 1000;
 const int resolution = 8;
 
@@ -57,11 +56,10 @@ int targetSpeed2 = maxSpeed2;
 
 std::__cxx11::string direction1 = "forward";
 std::__cxx11::string direction2 = "forward";
-
+std::__cxx11::string targetDirection1 = "forward";
+std::__cxx11::string targetDirection2 = "forward";
 
 const int pwmChannel1 = 4;
-
- 
 
 class MyCallbacksDirection1 : public BLECharacteristicCallbacks
 {
@@ -76,16 +74,29 @@ class MyCallbacksDirection1 : public BLECharacteristicCallbacks
       Serial.print("Received Value: ");
       Serial.print(rxValue.c_str());
     }
-    direction1 = rxValue;
+    targetDirection1 = rxValue;
 
     if (rxValue == "backward")
     {
       targetSpeed1 = -abs(targetSpeed1);
-      
+      /*   ledcDetachPin(motor1Pin1);
+        delay(30);
+        pinMode(motor1Pin1, INPUT_PULLDOWN);
+        delay(30);
+        pinMode(motor1Pin2, OUTPUT);
+        delay(30);
+        ledcAttachPin(motor1Pin2, 0); */
     }
     if (rxValue == "forward")
     {
       targetSpeed1 = abs(targetSpeed1);
+      /*     ledcDetachPin(motor1Pin2);
+          delay(30);
+          pinMode(motor1Pin2, INPUT_PULLDOWN);
+          delay(30);
+      pinMode(motor1Pin1, OUTPUT);
+      delay(30);
+        ledcAttachPin(motor1Pin1, 0); */
     }
   }
 };
@@ -103,16 +114,29 @@ class MyCallbacksDirection2 : public BLECharacteristicCallbacks
       Serial.print("Received Value: ");
       Serial.print(rxValue.c_str());
     }
-    direction2 = rxValue;
+    targetDirection2 = rxValue;
 
     if (rxValue == "backward")
     {
       targetSpeed2 = -abs(targetSpeed2);
-      
+      /*    ledcDetachPin(motor2Pin2);
+         delay(30);
+             pinMode(motor2Pin2, INPUT_PULLDOWN);
+             delay(30);
+ pinMode(motor2Pin1, OUTPUT);
+ delay(30);
+    ledcAttachPin(motor2Pin1, 1); */
     }
     if (rxValue == "forward")
     {
       targetSpeed2 = abs(targetSpeed2);
+      /*  ledcDetachPin(motor2Pin1);
+       delay(30);
+           pinMode(motor2Pin1, INPUT_PULLDOWN);
+           delay(30);
+pinMode(motor2Pin1, OUTPUT);
+delay(30);
+  ledcAttachPin(motor2Pin2, 1); */
     }
   }
 };
@@ -192,26 +216,28 @@ void setup()
 
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
-  // pinMode(enable1Pin, OUTPUT);
-  digitalWrite(motor1Pin1, HIGH);
+  pinMode(enable1Pin, OUTPUT);
+  digitalWrite(motor1Pin1, LOW);
   digitalWrite(motor1Pin2, LOW);
+  digitalWrite(enable1Pin, HIGH);
 
-    pinMode(motor2Pin1, OUTPUT);
+  pinMode(motor2Pin1, OUTPUT);
   pinMode(motor2Pin2, OUTPUT);
-  // pinMode(enable1Pin, OUTPUT);
-  digitalWrite(motor2Pin1, HIGH);
+  pinMode(enable2Pin, OUTPUT);
+  digitalWrite(motor2Pin1, LOW);
   digitalWrite(motor2Pin2, LOW);
+  digitalWrite(enable2Pin, HIGH);
 
   ledcSetup(0, 800, 8);
   // Attach the PWM signal to GPIO2
-  ledcAttachPin(enable1Pin, 0);
+  ledcAttachPin(motor1Pin1, 0);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(0, 0);
 
-    ledcSetup(1, 800, 8);
+  ledcSetup(1, 800, 8);
   // Attach the PWM signal to GPIO2
-  ledcAttachPin(enable2Pin, 1);
+  ledcAttachPin(motor2Pin1, 1);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(1, 0);
@@ -248,9 +274,7 @@ void setup()
   pCharacteristicDirection1->setValue("Hi,other ESP32 here is your data");
   pCharacteristicSpeed1->setValue("Hi,other ESP32 here is your data");
 
-
-
-    BLECharacteristic *pCharacteristicDirection2 = pService->createCharacteristic(
+  BLECharacteristic *pCharacteristicDirection2 = pService->createCharacteristic(
       CHARACTERISTIC_UUID_DIRECTION_2,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
 
@@ -264,9 +288,6 @@ void setup()
 
   pCharacteristicDirection2->setValue("Hi,other ESP32 here is your data");
   pCharacteristicSpeed2->setValue("Hi,other ESP32 here is your data");
-
-
-
 
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
@@ -293,21 +314,31 @@ void loop()
 
   ledcWrite(0, abs(speed1));
 
-  if (speed1 < 0)
+  if (speed1 < 0 && direction1 == "forward" && targetDirection1 == "backward")
   {
-    digitalWrite(motor1Pin1, LOW);
-    digitalWrite(motor1Pin2, HIGH);
+    direction1 = targetDirection1;
+    ledcDetachPin(motor1Pin1);
+    delay(30);
+    pinMode(motor1Pin1, INPUT_PULLDOWN);
+    delay(30);
+    pinMode(motor1Pin2, OUTPUT);
+    delay(30);
+    ledcAttachPin(motor1Pin2, 0);
   }
 
-  if (speed1 > 0)
+  if (speed1 > 0 && direction1 == "backward" && targetDirection1 == "forward")
   {
-    digitalWrite(motor1Pin1, HIGH);
-    digitalWrite(motor1Pin2, LOW);
+    direction1 = targetDirection1;
+    ledcDetachPin(motor1Pin2);
+    delay(30);
+    pinMode(motor1Pin2, INPUT_PULLDOWN);
+    delay(30);
+    pinMode(motor1Pin1, OUTPUT);
+    delay(30);
+    ledcAttachPin(motor1Pin1, 0);
   }
 
-  
-
-    if (speed2 < targetSpeed2)
+  if (speed2 < targetSpeed2)
   {
     speed2++;
   }
@@ -318,16 +349,28 @@ void loop()
 
   ledcWrite(1, abs(speed2));
 
-  if (speed2 < 0)
+  if (speed2 < 0 && direction2 == "forward" && targetDirection2 == "backward")
   {
-    digitalWrite(motor2Pin1, LOW);
-    digitalWrite(motor2Pin2, HIGH);
+    direction2 = targetDirection2;
+    ledcDetachPin(motor2Pin1);
+    delay(30);
+    pinMode(motor2Pin1, INPUT_PULLDOWN);
+    delay(30);
+    pinMode(motor2Pin2, OUTPUT);
+    delay(30);
+    ledcAttachPin(motor2Pin2, 0);
   }
 
-  if (speed2 > 0)
+  if (speed2 > 0 && direction2 == "backward" && targetDirection2 == "forward")
   {
-    digitalWrite(motor2Pin1, HIGH);
-    digitalWrite(motor2Pin2, LOW);
+    direction2 = targetDirection2;
+    ledcDetachPin(motor2Pin2);
+    delay(30);
+    pinMode(motor2Pin2, INPUT_PULLDOWN);
+    delay(30);
+    pinMode(motor2Pin1, OUTPUT);
+    delay(30);
+    ledcAttachPin(motor2Pin1, 0);
   }
 
   delay(10);
