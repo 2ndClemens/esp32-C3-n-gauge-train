@@ -314,27 +314,17 @@ void loop()
 
   ledcWrite(0, abs(speed1));
 
-  if (speed1 < 0 && direction1 == "forward" && targetDirection1 == "backward")
+  if (speed1 <= 0 && direction1 == "forward" && targetDirection1 == "backward")
   {
     direction1 = targetDirection1;
     ledcDetachPin(motor1Pin1);
-    delay(30);
-    pinMode(motor1Pin1, INPUT_PULLDOWN);
-    delay(30);
-    pinMode(motor1Pin2, OUTPUT);
-    delay(30);
     ledcAttachPin(motor1Pin2, 0);
   }
 
-  if (speed1 > 0 && direction1 == "backward" && targetDirection1 == "forward")
+  if (speed1 >= 0 && direction1 == "backward" && targetDirection1 == "forward")
   {
     direction1 = targetDirection1;
     ledcDetachPin(motor1Pin2);
-    delay(30);
-    pinMode(motor1Pin2, INPUT_PULLDOWN);
-    delay(30);
-    pinMode(motor1Pin1, OUTPUT);
-    delay(30);
     ledcAttachPin(motor1Pin1, 0);
   }
 
@@ -349,27 +339,17 @@ void loop()
 
   ledcWrite(1, abs(speed2));
 
-  if (speed2 < 0 && direction2 == "forward" && targetDirection2 == "backward")
+  if (speed2 <= 0 && direction2 == "forward" && targetDirection2 == "backward")
   {
     direction2 = targetDirection2;
     ledcDetachPin(motor2Pin1);
-    delay(30);
-    pinMode(motor2Pin1, INPUT_PULLDOWN);
-    delay(30);
-    pinMode(motor2Pin2, OUTPUT);
-    delay(30);
     ledcAttachPin(motor2Pin2, 0);
   }
 
-  if (speed2 > 0 && direction2 == "backward" && targetDirection2 == "forward")
+  if (speed2 >= 0 && direction2 == "backward" && targetDirection2 == "forward")
   {
     direction2 = targetDirection2;
     ledcDetachPin(motor2Pin2);
-    delay(30);
-    pinMode(motor2Pin2, INPUT_PULLDOWN);
-    delay(30);
-    pinMode(motor2Pin1, OUTPUT);
-    delay(30);
     ledcAttachPin(motor2Pin1, 0);
   }
 
