@@ -42,13 +42,10 @@ int motor2Pin1 = 10;
 int motor2Pin2 = 8;
 int enable2Pin = 7;
 
-int dutyCycle1 = 200;
-
 int speed1 = 0;
 int maxSpeed1 = 200;
 int targetSpeed1 = maxSpeed1;
 
-int dutyCycle2 = 200;
 
 int speed2 = 0;
 int maxSpeed2 = 200;
@@ -343,14 +340,14 @@ void loop()
   {
     direction2 = targetDirection2;
     ledcDetachPin(motor2Pin1);
-    ledcAttachPin(motor2Pin2, 0);
+    ledcAttachPin(motor2Pin2, 1);
   }
 
   if (speed2 >= 0 && direction2 == "backward" && targetDirection2 == "forward")
   {
     direction2 = targetDirection2;
     ledcDetachPin(motor2Pin2);
-    ledcAttachPin(motor2Pin1, 0);
+    ledcAttachPin(motor2Pin1, 1);
   }
 
   delay(10);
