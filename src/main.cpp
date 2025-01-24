@@ -12,7 +12,9 @@
 
 #define NUMPIXELS 1
 
-const int freq = 1000;
+//const int freq = 12800;
+//const int freq = 800;
+const int freq = 160;
 const int resolution = 8;
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -225,14 +227,14 @@ void setup()
   digitalWrite(motor2Pin2, LOW);
   digitalWrite(enable2Pin, HIGH);
 
-  ledcSetup(0, 800, 8);
+  ledcSetup(0, freq, 8);
   // Attach the PWM signal to GPIO2
   ledcAttachPin(motor1Pin1, 0);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(0, 0);
 
-  ledcSetup(1, 800, 8);
+  ledcSetup(1, freq, 8);
   // Attach the PWM signal to GPIO2
   ledcAttachPin(motor2Pin1, 1);
 
