@@ -14,7 +14,7 @@
 
 //const int freq = 12800;
 //const int freq = 800;
-const int freq = 160;
+int freq = 160;
 const int resolution = 8;
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -22,11 +22,15 @@ const int resolution = 8;
 #define CHARACTERISTIC_UUID_SPEED_1 "beb5483f-36e1-4688-b7f5-ea07361b26a8"
 #define CHARACTERISTIC_UUID_DIRECTION_2 "beb5483c-36e1-4688-b7f5-ea07361b26a8"
 #define CHARACTERISTIC_UUID_SPEED_2 "beb5483d-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_FREQUENCY "beb5483b-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_LED_STATES "beb5483a-36e1-4688-b7f5-ea07361b26a8"
 
 Adafruit_NeoPixel pixels(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
 
 TaskHandle_t TaskHandle_buttonRead;
 TaskHandle_t TaskHandle_Led;
+
+extern int ledStates;
 
 int buttonLastState = HIGH;
 int buttonCurrentState;
@@ -59,6 +63,50 @@ std::__cxx11::string targetDirection1 = "forward";
 std::__cxx11::string targetDirection2 = "forward";
 
 const int pwmChannel1 = 4;
+
+
+class MyCallbacksLedStates : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    std::string rxValue = pCharacteristic->getValue();
+
+    if (rxValue.length() > 0)
+    {
+
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      ledStates = atoi(rxValue.c_str());
+      Serial.print(String(freq));
+    }
+  }
+};
+
+
+
+class MyCallbacksFrequency : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    std::string rxValue = pCharacteristic->getValue();
+
+    if (rxValue.length() > 0)
+    {
+
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      freq = atoi(rxValue.c_str());
+      ledcChangeFrequency(0,freq,8);
+      ledcChangeFrequency(1,freq,8);
+
+      Serial.print(String(freq));
+    }
+  }
+};
+
+
+
+
 
 class MyCallbacksDirection1 : public BLECharacteristicCallbacks
 {
@@ -287,6 +335,35 @@ void setup()
 
   pCharacteristicDirection2->setValue("Hi,other ESP32 here is your data");
   pCharacteristicSpeed2->setValue("Hi,other ESP32 here is your data");
+
+
+
+
+  BLECharacteristic *pCharacteristicLedStates = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_LED_STATES,
+      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  pCharacteristicLedStates->setCallbacks(new MyCallbacksLedStates());
+  pCharacteristicLedStates->addDescriptor(new BLE2902());
+  pCharacteristicLedStates->setValue("Hi,other ESP32 here is your data");
+
+
+
+
+
+
+  BLECharacteristic *pCharacteristicFrequency = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_FREQUENCY,
+      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  pCharacteristicFrequency->setCallbacks(new MyCallbacksFrequency());
+  pCharacteristicFrequency->addDescriptor(new BLE2902());
+  pCharacteristicFrequency->setValue("Hi,other ESP32 here is your data");
+
+
+
+
+
+
+  
 
   pService->start();
   // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
