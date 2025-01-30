@@ -13,7 +13,7 @@
 #define NUMPIXELS2 10
 #define LED2 1
 
-int ledStates = 0b1000000001;
+int ledStates = 0b1111111111;
 
 Adafruit_NeoPixel pixels2(NUMPIXELS2, LED2, NEO_GRB + NEO_KHZ800);
 

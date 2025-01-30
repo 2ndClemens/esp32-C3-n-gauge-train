@@ -77,7 +77,7 @@ class MyCallbacksLedStates : public BLECharacteristicCallbacks
       Serial.println("*********");
       Serial.print("Received Value: ");
       ledStates = atoi(rxValue.c_str());
-      Serial.print(String(freq));
+      //Serial.print(String(freq));
     }
   }
 };
@@ -304,7 +304,7 @@ void setup()
 
   BLEDevice::init("ESP32 AS A BLE");
   BLEServer *pServer = BLEDevice::createServer();
-  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID),30,0);
 
   BLECharacteristic *pCharacteristicDirection1 = pService->createCharacteristic(
       CHARACTERISTIC_UUID_DIRECTION_1,
@@ -339,6 +339,17 @@ void setup()
 
 
 
+  BLECharacteristic *pCharacteristicFrequency = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_FREQUENCY,
+      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
+  pCharacteristicFrequency->setCallbacks(new MyCallbacksFrequency());
+  pCharacteristicFrequency->addDescriptor(new BLE2902());
+  pCharacteristicFrequency->setValue("Hi,other ESP32 here is your data");
+
+
+
+
+
   BLECharacteristic *pCharacteristicLedStates = pService->createCharacteristic(
       CHARACTERISTIC_UUID_LED_STATES,
       BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
@@ -351,12 +362,7 @@ void setup()
 
 
 
-  BLECharacteristic *pCharacteristicFrequency = pService->createCharacteristic(
-      CHARACTERISTIC_UUID_FREQUENCY,
-      BLECharacteristic::BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_WRITE);
-  pCharacteristicFrequency->setCallbacks(new MyCallbacksFrequency());
-  pCharacteristicFrequency->addDescriptor(new BLE2902());
-  pCharacteristicFrequency->setValue("Hi,other ESP32 here is your data");
+
 
 
 
