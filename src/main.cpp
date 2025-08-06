@@ -40,13 +40,13 @@ int high = 255;
 int mid = 128;
 int low = 0;
 
-int motor1Pin1 = 6;
-int motor1Pin2 = 5;
-int enable1Pin = 4;
+int motor1Pin1 = 5;
+int motor1Pin2 = 4;
+int enable1Pin = 6;
 
-int motor2Pin1 = 10;
-int motor2Pin2 = 8;
-int enable2Pin = 7;
+int motor2Pin1 = 8;
+int motor2Pin2 = 7;
+int enable2Pin = 10;
 
 int speed1 = 0;
 int maxSpeed1 = 200;
@@ -258,9 +258,6 @@ void buttonRead(void *pvParameters)
 }
 void setup()
 {
-  Serial.begin(115200);
-  setupLedTask();
-
   pinMode(motor1Pin1, OUTPUT);
   pinMode(motor1Pin2, OUTPUT);
   pinMode(enable1Pin, OUTPUT);
@@ -274,17 +271,21 @@ void setup()
   digitalWrite(motor2Pin1, LOW);
   digitalWrite(motor2Pin2, LOW);
   digitalWrite(enable2Pin, HIGH);
+  Serial.begin(115200);
+  setupLedTask();
+
+
 
   ledcSetup(0, freq, 8);
   // Attach the PWM signal to GPIO2
-  ledcAttachPin(motor1Pin1, 0);
+   ledcAttachPin(motor1Pin1, 0);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(0, 0);
 
   ledcSetup(1, freq, 8);
   // Attach the PWM signal to GPIO2
-  ledcAttachPin(motor2Pin1, 1);
+   ledcAttachPin(motor2Pin1, 1);
 
   // Set the duty cycle to 2ms (2000 microseconds)
   ledcWrite(1, 0);
